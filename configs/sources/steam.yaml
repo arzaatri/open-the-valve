@@ -1,0 +1,4 @@
+base_url: https://api.steampowered.com
+api_key: ${oc.env:STEAM_API_KEY,null}
+requests_per_second: 2.0
+poll_interval_hours: 3

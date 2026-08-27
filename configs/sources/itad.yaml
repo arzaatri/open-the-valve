@@ -1,0 +1,4 @@
+base_url: https://api.isthereanydeal.com
+api_key: ${oc.env:ITAD_API_KEY}
+requests_per_second: 3.0
+history_since_default_days: 365

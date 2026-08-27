@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+logs/*.log
+.env
+outputs/
+.DS_Store
+NOTES.txt
+TODO.txt

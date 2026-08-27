@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: otv
+      POSTGRES_PASSWORD: otv
+      POSTGRES_DB: open_the_valve
+    ports:
+      - "5433:5432"
+    volumes:
+      - otv_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otv"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  otv_pgdata:

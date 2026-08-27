@@ -1,0 +1,52 @@
+[project]
+name = "open-the-valve"
+version = "0.1.0"
+description = "Causal inference on Steam discount effects on player counts"
+requires-python = ">=3.12"
+dependencies = [
+    "hydra-core>=1.3",
+    "omegaconf>=2.3",
+    "pydantic>=2.7",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.1",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+    "respx>=0.21",
+    "ruff>=0.5",
+    "black>=24.0",
+    "mypy>=1.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/open_the_valve"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/open_the_valve/db/migrations/versions/*.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+base_url: https://api.igdb.com/v4
+oauth_url: https://id.twitch.tv/oauth2/token
+client_id: ${oc.env:IGDB_CLIENT_ID}
+client_secret: ${oc.env:IGDB_CLIENT_SECRET}
+requests_per_second: 4.0
+max_concurrent_requests: 8

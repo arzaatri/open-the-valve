@@ -1,0 +1,18 @@
+defaults:
+  - db: local
+  - sources@sources.steam: steam
+  - sources@sources.itad: itad
+  - sources@sources.igdb: igdb
+  - sources@sources.steamcharts: steamcharts
+  - override hydra/job_logging: none
+  - override hydra/hydra_logging: none
+  - _self_
+
+seed_games_file: seed_games.yaml
+
+hydra:
+  output_subdir: null
+  job:
+    chdir: false
+  run:
+    dir: .
