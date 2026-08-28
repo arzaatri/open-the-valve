@@ -23,6 +23,7 @@ dependencies = [
     "tabulate>=0.9",
     "mlflow>=2.14",
     "evidently>=0.4",
+    "streamlit>=1.38",
 ]
 
 [project.optional-dependencies]

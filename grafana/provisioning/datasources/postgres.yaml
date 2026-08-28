@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: open-the-valve
+    uid: otv-postgres
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: open_the_valve
+    user: otv
+    isDefault: true
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+    secureJsonData:
+      password: otv

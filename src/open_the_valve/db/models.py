@@ -2,6 +2,7 @@ import enum
 from datetime import date, datetime
 
 from sqlalchemy import (
+    Boolean,
     Date,
     DateTime,
     Enum,
@@ -140,3 +141,5 @@ class CausalRunHistory(Base):
     panel_row_count: Mapped[int] = mapped_column(Integer, nullable=False)
     n_treated_rows: Mapped[int] = mapped_column(Integer, nullable=False)
     mlflow_run_id: Mapped[str] = mapped_column(String, nullable=False)
+    dataset_drift_share: Mapped[float | None] = mapped_column(Float)
+    cate_drift_detected: Mapped[bool | None] = mapped_column(Boolean)

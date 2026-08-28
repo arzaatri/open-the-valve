@@ -87,7 +87,7 @@ def run(config: AppConfig) -> None:
     )
 
     os.makedirs(_DRIFT_OUTPUT_DIR, exist_ok=True)
-    build_drift_report(
+    dataset_drift_share, cate_drift_detected = build_drift_report(
         reference,
         current,
         reference[_PRIMARY_ESTIMATOR].to_numpy(),
@@ -95,6 +95,13 @@ def run(config: AppConfig) -> None:
         os.path.join(_DRIFT_OUTPUT_DIR, "drift_report.html"),
     )
     logger.info("wrote drift report comparing against mlflow_run_id=%s", last_mlflow_run_id)
+
+    with session_scope(engine) as session:
+        current_run = repo.get_latest_causal_run(session)
+        assert current_run is not None
+        repo.update_drift_summary(
+            session, current_run.mlflow_run_id, dataset_drift_share, cate_drift_detected
+        )
 
 
 main = hydra_entrypoint(run)

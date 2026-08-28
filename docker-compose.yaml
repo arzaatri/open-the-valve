@@ -15,5 +15,20 @@ services:
       timeout: 5s
       retries: 10
 
+  grafana:
+    image: grafana/grafana:11.2.0
+    depends_on:
+      - postgres
+    ports:
+      - "3001:3000"
+    environment:
+      # ponytail: anonymous viewer access, fine for a local single-machine
+      # demo; add real auth before this ever leaves localhost.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
 volumes:
   otv_pgdata:

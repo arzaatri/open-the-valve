@@ -1,0 +1,236 @@
+{
+  "title": "Open The Valve \u2014 Ops",
+  "uid": "otv-ops",
+  "editable": true,
+  "timezone": "browser",
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Latest panel row count",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT panel_row_count FROM causal_run_history ORDER BY id DESC LIMIT 1",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Latest treated rows",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT n_treated_rows FROM causal_run_history ORDER BY id DESC LIMIT 1",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Latest dataset drift share",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.15
+              },
+              {
+                "color": "red",
+                "value": 0.3
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT dataset_drift_share FROM causal_run_history ORDER BY id DESC LIMIT 1",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Latest CATE drift detected",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "true": {
+                  "text": "DRIFTED",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "false": {
+                  "text": "stable",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT cate_drift_detected FROM causal_run_history ORDER BY id DESC LIMIT 1",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Retrain history",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT run_at, panel_start_date, panel_end_date, panel_row_count, n_treated_rows, dataset_drift_share, cate_drift_detected, mlflow_run_id FROM causal_run_history ORDER BY run_at DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Ingestion watermark staleness (oldest, hours)",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 14
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT EXTRACT(EPOCH FROM (now() - MIN(updated_at))) / 3600 AS hours FROM ingestion_watermarks",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Latest polled daily player-count date",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 14
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT MAX(observed_date) AS latest_date FROM player_count_history WHERE granularity = 'DAILY'",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Daily player-count rows added",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "otv-postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT observed_date AS time, COUNT(*) AS rows_added FROM player_count_history WHERE granularity = 'DAILY' GROUP BY observed_date ORDER BY observed_date",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

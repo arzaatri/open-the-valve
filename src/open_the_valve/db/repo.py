@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -192,7 +192,9 @@ def record_causal_run(
 ) -> None:
     """Appends one row to the causal-analysis run ledger. Not an upsert --
     every run_causal_analysis execution gets its own row, an append-only log
-    the retrain gate and drift report read from."""
+    the retrain gate and drift report read from. Drift columns start NULL --
+    run_causal_analysis has no reference run to diff against; only the
+    retrain gate does, via update_drift_summary below."""
     session.execute(
         insert(CausalRunHistory).values(
             panel_start_date=panel_start_date,
@@ -208,3 +210,16 @@ def get_latest_causal_run(session: Session) -> CausalRunHistory | None:
     return session.execute(
         select(CausalRunHistory).order_by(CausalRunHistory.id.desc()).limit(1)
     ).scalar_one_or_none()
+
+
+def update_drift_summary(
+    session: Session,
+    mlflow_run_id: str,
+    dataset_drift_share: float,
+    cate_drift_detected: bool,
+) -> None:
+    session.execute(
+        update(CausalRunHistory)
+        .where(CausalRunHistory.mlflow_run_id == mlflow_run_id)
+        .values(dataset_drift_share=dataset_drift_share, cate_drift_detected=cate_drift_detected)
+    )
