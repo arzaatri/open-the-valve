@@ -8,9 +8,11 @@ from sqlalchemy import select
 from open_the_valve.causal.cate_estimators import build_causal_graph, fit_all_estimators
 from open_the_valve.causal.its import run_its_all_events
 from open_the_valve.config_models import AppConfig
+from open_the_valve.db import repo
 from open_the_valve.db.models import DiscountEvent
-from open_the_valve.db.session import make_engine
+from open_the_valve.db.session import make_engine, session_scope
 from open_the_valve.io_utils.hydra_entrypoint import hydra_entrypoint
+from open_the_valve.mlops.tracking import log_causal_run
 from open_the_valve.reports.findings import (
     build_cate_slice_table,
     build_comparison_table,
@@ -75,8 +77,21 @@ def run(config: AppConfig) -> None:
     write_findings_markdown(
         comparison_table, slice_table, causal_graph, config.causal.findings.output_path
     )
-
     logger.info("wrote findings to %s", config.causal.findings.output_path)
+
+    mlflow_run_id = log_causal_run(
+        cate_run, its_results, panel, config.causal.cate, config.mlops, output_dir
+    )
+    with session_scope(engine) as session:
+        repo.record_causal_run(
+            session,
+            panel_start_date=panel["date"].min(),
+            panel_end_date=panel["date"].max(),
+            panel_row_count=len(panel),
+            n_treated_rows=int(panel[_TREATMENT_COL].sum()),
+            mlflow_run_id=mlflow_run_id,
+        )
+    logger.info("recorded causal run, mlflow_run_id=%s", mlflow_run_id)
 
 
 main = hydra_entrypoint(run)

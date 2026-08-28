@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from dowhy import CausalModel
 from xgboost import XGBClassifier, XGBRegressor
@@ -230,13 +231,8 @@ def fit_all_estimators(
     )
 
 
-def slice_cate_by_subgroup(
-    result: EstimatorResult, cate_run: CateRun, slice_col: str
-) -> pd.DataFrame:
-    """Per-level mean CATE for one fitted estimator, sliced by a raw covariate
-    column in cate_run.data (may or may not be one of the model's own encoded
-    covariates -- exploratory dims like season/game_age_bucket don't need to
-    have been in the model to be sliced on here).
+def predict_row_cate(result: EstimatorResult, cate_run: CateRun) -> np.ndarray:
+    """Per-row CATE for one fitted estimator, in cate_run.data's row order.
 
     S/T/X-learner have no separate W input in EconML's API, so DoWhy fits them
     on the full confounder+heterogeneity matrix rather than the heterogeneity
@@ -246,11 +242,20 @@ def slice_cate_by_subgroup(
     a fallback rather than hardcoding per-estimator-name branching here.
     """
     try:
-        X = cate_run.encoded_covariates.to_numpy()
-        per_row_cate = result.fitted_estimator.effect(X)
+        return result.fitted_estimator.effect(cate_run.encoded_covariates.to_numpy())
     except ValueError:
-        X = cate_run.encoded_confounders.to_numpy()
-        per_row_cate = result.fitted_estimator.effect(X)
+        return result.fitted_estimator.effect(cate_run.encoded_confounders.to_numpy())
+
+
+def slice_cate_by_subgroup(
+    result: EstimatorResult, cate_run: CateRun, slice_col: str
+) -> pd.DataFrame:
+    """Per-level mean CATE for one fitted estimator, sliced by a raw covariate
+    column in cate_run.data (may or may not be one of the model's own encoded
+    covariates -- exploratory dims like season/game_age_bucket don't need to
+    have been in the model to be sliced on here).
+    """
+    per_row_cate = predict_row_cate(result, cate_run)
     sliced = pd.DataFrame(
         {"slice_value": cate_run.data[slice_col].to_numpy(), "cate": per_row_cate}
     )

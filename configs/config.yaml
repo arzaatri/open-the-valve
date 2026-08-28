@@ -8,6 +8,8 @@ defaults:
   - causal@causal.its: its
   - causal@causal.cate: cate
   - causal@causal.findings: findings
+  - mlops@mlops: tracking
+  - mlops@retrain: retrain
   - override hydra/job_logging: none
   - override hydra/hydra_logging: none
   - _self_

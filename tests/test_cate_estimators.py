@@ -2,7 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from open_the_valve.causal.cate_estimators import fit_all_estimators, slice_cate_by_subgroup
+from open_the_valve.causal.cate_estimators import (
+    fit_all_estimators,
+    predict_row_cate,
+    slice_cate_by_subgroup,
+)
 from open_the_valve.config_models import CateConfig
 
 
@@ -58,6 +62,13 @@ def test_all_six_estimators_slice_without_error(cate_run):
         sliced = slice_cate_by_subgroup(result, cate_run, "genre")
         assert set(sliced["slice_value"]) == {"Shooter", "Strategy"}
         assert sliced["mean_effect"].notna().all()
+
+
+def test_predict_row_cate_returns_one_value_per_row(cate_run):
+    for result in cate_run.results.values():
+        per_row = predict_row_cate(result, cate_run)
+        assert len(per_row) == len(cate_run.data)
+        assert np.isfinite(per_row).all()
 
 
 def test_causal_forest_dml_refutation_pipeline_runs_end_to_end(cate_run):

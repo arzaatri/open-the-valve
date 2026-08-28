@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from open_the_valve.db.models import (
+    CausalRunHistory,
     DiscountEvent,
     Game,
     GameMetadata,
@@ -179,3 +180,31 @@ def rebuild_discount_events(session: Session, game_id: int) -> None:
 
     for event in events:
         session.execute(insert(DiscountEvent).values(game_id=game_id, **event))
+
+
+def record_causal_run(
+    session: Session,
+    panel_start_date: date,
+    panel_end_date: date,
+    panel_row_count: int,
+    n_treated_rows: int,
+    mlflow_run_id: str,
+) -> None:
+    """Appends one row to the causal-analysis run ledger. Not an upsert --
+    every run_causal_analysis execution gets its own row, an append-only log
+    the retrain gate and drift report read from."""
+    session.execute(
+        insert(CausalRunHistory).values(
+            panel_start_date=panel_start_date,
+            panel_end_date=panel_end_date,
+            panel_row_count=panel_row_count,
+            n_treated_rows=n_treated_rows,
+            mlflow_run_id=mlflow_run_id,
+        )
+    )
+
+
+def get_latest_causal_run(session: Session) -> CausalRunHistory | None:
+    return session.execute(
+        select(CausalRunHistory).order_by(CausalRunHistory.id.desc()).limit(1)
+    ).scalar_one_or_none()

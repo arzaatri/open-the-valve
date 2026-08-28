@@ -9,6 +9,8 @@ venv/
 logs/*.log
 .env
 outputs/
+mlruns/
+mlruns.db
 .DS_Store
 NOTES.txt
 TODO.txt

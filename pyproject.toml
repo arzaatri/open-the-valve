@@ -21,6 +21,8 @@ dependencies = [
     "dowhy>=0.14",
     "pyarrow>=17.0",
     "tabulate>=0.9",
+    "mlflow>=2.14",
+    "evidently>=0.4",
 ]
 
 [project.optional-dependencies]

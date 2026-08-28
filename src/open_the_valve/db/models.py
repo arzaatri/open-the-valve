@@ -121,3 +121,22 @@ class IngestionWatermark(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class CausalRunHistory(Base):
+    """One row per `run_causal_analysis` execution -- a pointer to the run's
+    MLflow artifacts, not a copy of the panel itself. Read by the Phase 3
+    retrain gate (compare current player_count_history size against
+    panel_row_count) and the drift report (fetch the previous run's
+    cate_predictions.parquet via mlflow_run_id).
+    """
+
+    __tablename__ = "causal_run_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    panel_start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    panel_end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    panel_row_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    n_treated_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    mlflow_run_id: Mapped[str] = mapped_column(String, nullable=False)

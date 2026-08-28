@@ -106,11 +106,22 @@ class CausalConfig(BaseModel):
     findings: FindingsConfig
 
 
+class MlopsConfig(BaseModel):
+    tracking_uri: str
+    experiment_name: str
+
+
+class RetrainConfig(BaseModel):
+    new_rows_threshold: int
+
+
 class AppConfig(BaseModel):
     db: DbConfig
     sources: SourcesConfig
     seed_games_file: str
     causal: CausalConfig
+    mlops: MlopsConfig
+    retrain: RetrainConfig
 
     @field_validator("seed_games_file")
     @classmethod
