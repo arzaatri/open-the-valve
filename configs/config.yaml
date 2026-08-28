@@ -4,6 +4,10 @@ defaults:
   - sources@sources.itad: itad
   - sources@sources.igdb: igdb
   - sources@sources.steamcharts: steamcharts
+  - causal@causal.panel: panel
+  - causal@causal.its: its
+  - causal@causal.cate: cate
+  - causal@causal.findings: findings
   - override hydra/job_logging: none
   - override hydra/hydra_logging: none
   - _self_

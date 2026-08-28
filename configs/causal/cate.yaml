@@ -1,0 +1,21 @@
+xgb_n_estimators: 100
+xgb_max_depth: 3
+xgb_learning_rate: 0.1
+cf_n_estimators: 200
+cf_min_samples_leaf: 10
+estimator_names:
+  - s_learner
+  - t_learner
+  - x_learner
+  - dr_learner
+  - linear_dml
+  - causal_forest_dml
+slice_dims:
+  - genre
+  - price_tier
+  - depth_bucket
+exploratory_dims:
+  - season
+  - game_age_bucket
+refutation_num_simulations: 20
+refutation_seed: 42

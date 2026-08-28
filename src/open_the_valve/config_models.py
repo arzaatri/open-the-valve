@@ -67,10 +67,49 @@ class SeedGamesFile(BaseModel):
     games: list[SeedGame]
 
 
+class PanelConfig(BaseModel):
+    start_date: str
+    end_date: str
+    detrend_window_days: int
+    platform_sale_threshold_frac: float
+    output_path: str
+
+
+class ItsConfig(BaseModel):
+    pre_window_days: int
+    post_window_days: int
+    min_pre_period_obs: int
+
+
+class CateConfig(BaseModel):
+    xgb_n_estimators: int
+    xgb_max_depth: int
+    xgb_learning_rate: float
+    cf_n_estimators: int
+    cf_min_samples_leaf: int
+    estimator_names: list[str]
+    slice_dims: list[str]
+    exploratory_dims: list[str]
+    refutation_num_simulations: int
+    refutation_seed: int
+
+
+class FindingsConfig(BaseModel):
+    output_path: str
+
+
+class CausalConfig(BaseModel):
+    panel: PanelConfig
+    its: ItsConfig
+    cate: CateConfig
+    findings: FindingsConfig
+
+
 class AppConfig(BaseModel):
     db: DbConfig
     sources: SourcesConfig
     seed_games_file: str
+    causal: CausalConfig
 
     @field_validator("seed_games_file")
     @classmethod

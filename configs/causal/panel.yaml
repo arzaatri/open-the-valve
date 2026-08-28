@@ -1,0 +1,5 @@
+start_date: "2026-05-31"
+end_date: "2026-08-27"
+detrend_window_days: 14
+platform_sale_threshold_frac: 0.6
+output_path: outputs/causal/panel.parquet
