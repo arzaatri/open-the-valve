@@ -2,15 +2,14 @@ import datetime
 import logging
 from contextlib import closing
 
-import hydra
 from dotenv import load_dotenv
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 from open_the_valve.config_models import AppConfig, SeedGamesFile
 from open_the_valve.db import repo
 from open_the_valve.db.session import make_engine, session_scope
 from open_the_valve.ingestion.igdb_client import IgdbClient
-from open_the_valve.logging_utils import setup_logging
+from open_the_valve.io_utils.hydra_entrypoint import hydra_entrypoint
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -53,12 +52,7 @@ def run(config: AppConfig) -> None:
             logger.info("backfilled metadata for %s (igdb_id=%d)", seed_game.name, igdb_id)
 
 
-@hydra.main(config_path="../../../configs", config_name="config", version_base=None)
-def main(cfg: DictConfig) -> None:
-    setup_logging()
-    config = AppConfig.model_validate(OmegaConf.to_container(cfg, resolve=True))
-    run(config)
-
+main = hydra_entrypoint(run)
 
 if __name__ == "__main__":
     main()

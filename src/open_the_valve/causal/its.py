@@ -15,16 +15,17 @@ class ItsEffectResult:
     game_id: int
     event_start: date
     n_pre_obs: int
-    daily_effects: pd.DataFrame  # columns: date, actual, counterfactual, effect
     mean_post_effect: float
 
 
 def fit_pretrend(
     game_panel: pd.DataFrame, event_start: date, pre_window_days: int, outcome_col: str
-) -> sm.regression.linear_model.RegressionResultsWrapper | None:
+) -> tuple[sm.regression.linear_model.RegressionResultsWrapper, pd.DataFrame] | None:
     """OLS(outcome ~ day_offset) over non-discounted days in
     [event_start - pre_window_days, event_start). Returns None if there's no
-    usable pre-period data at all (caller enforces the minimum-observations gate).
+    usable pre-period data at all. Returns the filtered pre-period frame
+    alongside the fitted model so callers can derive n_pre_obs from it
+    directly instead of re-filtering the same window.
     """
     window_start = event_start - timedelta(days=pre_window_days)
     pre = game_panel[
@@ -37,7 +38,7 @@ def fit_pretrend(
 
     day_offset = pre["date"].apply(lambda d: (d - event_start).days)
     X = sm.add_constant(day_offset)
-    return sm.OLS(pre[outcome_col], X).fit()
+    return sm.OLS(pre[outcome_col], X).fit(), pre
 
 
 def estimate_its_effect(
@@ -59,21 +60,12 @@ def estimate_its_effect(
     pretrend fit for events spaced closer together than pre_window_days;
     revisit with an explicit inter-event gap filter if events cluster tightly.
     """
-    window_start = event_start - timedelta(days=pre_window_days)
-    n_pre_obs = (
-        game_panel[
-            (game_panel["date"] >= window_start)
-            & (game_panel["date"] < event_start)
-            & (~game_panel["is_discounted"])
-        ][outcome_col]
-        .notna()
-        .sum()
-    )
-    if n_pre_obs < min_pre_period_obs:
+    fit_result = fit_pretrend(game_panel, event_start, pre_window_days, outcome_col)
+    if fit_result is None:
         return None
-
-    model = fit_pretrend(game_panel, event_start, pre_window_days, outcome_col)
-    if model is None:
+    model, pre = fit_result
+    n_pre_obs = len(pre)
+    if n_pre_obs < min_pre_period_obs:
         return None
 
     window_end = event_start + timedelta(days=post_window_days)
@@ -85,22 +77,13 @@ def estimate_its_effect(
 
     day_offset = post["date"].apply(lambda d: (d - event_start).days)
     counterfactual = model.predict(sm.add_constant(day_offset, has_constant="add"))
-
-    daily_effects = pd.DataFrame(
-        {
-            "date": post["date"].to_numpy(),
-            "actual": post[outcome_col].to_numpy(),
-            "counterfactual": counterfactual.to_numpy(),
-        }
-    )
-    daily_effects["effect"] = daily_effects["actual"] - daily_effects["counterfactual"]
+    mean_post_effect = float((post[outcome_col].to_numpy() - counterfactual.to_numpy()).mean())
 
     return ItsEffectResult(
         game_id=game_id,
         event_start=event_start,
-        n_pre_obs=int(n_pre_obs),
-        daily_effects=daily_effects,
-        mean_post_effect=float(daily_effects["effect"].mean()),
+        n_pre_obs=n_pre_obs,
+        mean_post_effect=mean_post_effect,
     )
 
 

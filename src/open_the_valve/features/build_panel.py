@@ -179,10 +179,7 @@ def build_panel(raw: RawTables, config: PanelConfig) -> pd.DataFrame:
     [config.start_date, config.end_date] with outcome, treatment, and covariate
     columns ready for causal/its.py and causal/cate_estimators.py.
     """
-    start_date = date.fromisoformat(config.start_date)
-    end_date = date.fromisoformat(config.end_date)
-
-    spine = _build_date_spine(raw.games["id"].tolist(), start_date, end_date)
+    spine = _build_date_spine(raw.games["id"].tolist(), config.start_date, config.end_date)
     # Outcome is Steam's own concurrent-player count, so treatment is scoped to
     # Steam-storefront discounts specifically -- third-party reseller discounts
     # (GOG, Epic, Fanatical, etc.) reach players through a different, indirect

@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from pydantic import BaseModel, field_validator
@@ -68,8 +69,8 @@ class SeedGamesFile(BaseModel):
 
 
 class PanelConfig(BaseModel):
-    start_date: str
-    end_date: str
+    start_date: date
+    end_date: date
     detrend_window_days: int
     platform_sale_threshold_frac: float
     output_path: str

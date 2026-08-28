@@ -1,10 +1,8 @@
 import logging
 import os
 
-import hydra
 import pandas as pd
 from dotenv import load_dotenv
-from omegaconf import DictConfig, OmegaConf
 from sqlalchemy import select
 
 from open_the_valve.causal.cate_estimators import build_causal_graph, fit_all_estimators
@@ -12,7 +10,7 @@ from open_the_valve.causal.its import run_its_all_events
 from open_the_valve.config_models import AppConfig
 from open_the_valve.db.models import DiscountEvent
 from open_the_valve.db.session import make_engine
-from open_the_valve.logging_utils import setup_logging
+from open_the_valve.io_utils.hydra_entrypoint import hydra_entrypoint
 from open_the_valve.reports.findings import (
     build_cate_slice_table,
     build_comparison_table,
@@ -81,12 +79,7 @@ def run(config: AppConfig) -> None:
     logger.info("wrote findings to %s", config.causal.findings.output_path)
 
 
-@hydra.main(config_path="../../../configs", config_name="config", version_base=None)
-def main(cfg: DictConfig) -> None:
-    setup_logging()
-    config = AppConfig.model_validate(OmegaConf.to_container(cfg, resolve=True))
-    run(config)
-
+main = hydra_entrypoint(run)
 
 if __name__ == "__main__":
     main()

@@ -7,8 +7,7 @@ _CAVEATS = {
     "s_learner": "single shared model across arms; can under-fit heterogeneity when the "
     "treatment effect is small relative to outcome variance",
     "t_learner": "separate per-arm models; can overfit when the treated arm is small",
-    "x_learner": "corrects T-learner's small-arm variance via propensity-weighted "
-    "cross-imputation",
+    "x_learner": "corrects T-learner's small-arm variance via propensity-weighted cross-imputation",
     "dr_learner": "doubly robust: consistent if either the propensity or outcome model "
     "is correctly specified",
     "linear_dml": "R-learner family; assumes a linear treatment effect in the covariates. "
